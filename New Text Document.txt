@@ -1,0 +1,49 @@
+clauseguard/
+├── CLAUDE.md                 # AI-dev rules, shows your Claude Code workflow
+├── docker-compose.yml        # postgres, qdrant, minio, api
+├── Makefile
+├── playbooks/                # YAML rules: clause type, risk criteria, fallback language
+├── data/scripts/             # download CUAD/EDGAR, generate scanned PDFs
+├── src/clauseguard/
+│   ├── api/                  # FastAPI routers, auth, dependency wiring
+│   ├── schemas/              # Pydantic models: Clause, Finding, ReviewDecision
+│   ├── db/                   # SQLAlchemy models, Alembic migrations, repositories
+│   ├── ingestion/
+│   │   ├── parsers/          # Docling/PyMuPDF
+│   │   ├── ocr/              # Tesseract fallback, quality scoring
+│   │   ├── segmentation/     # clause segmenter
+│   │   └── extraction/       # parties, dates, amounts (spaCy + LLM structured output)
+│   ├── retrieval/
+│   │   ├── embeddings/       # provider interface: API / open / fine-tuned
+│   │   ├── indexing/         # Qdrant collections, upsert, versioning
+│   │   ├── hybrid.py         # dense + sparse fusion
+│   │   ├── rerank.py         # cross-encoder
+│   │   └── playbook_store.py # rule retrieval
+│   ├── agents/
+│   │   ├── graph.py          # LangGraph: classify → retrieve → assess → redline → human review
+│   │   ├── nodes/            # one file per node
+│   │   ├── hitl/             # interrupt, resume, approval states
+│   │   ├── prompts/          # versioned prompt files
+│   │   └── llm/              # client wrapper: retries, cost/latency logging
+│   ├── mcp_server/           # find_clause, get_playbook_rule, compare_to_standard
+│   └── governance/
+│       ├── audit.py          # append-only audit log
+│       ├── pii.py            # masking before LLM calls
+│       ├── citations.py      # span + page + rule on every finding
+│       └── guardrails.py     # output validation, confidence thresholds
+├── ml/
+│   ├── clause_classifier/    # fine-tune DeBERTa/ModernBERT on CUAD
+│   └── embedding_finetune/   # sentence-transformers on clause pairs
+├── evals/
+│   ├── extraction_eval.py    # P/R per clause type vs CUAD labels
+│   ├── retrieval_eval.py     # recall@k, MRR across embedding variants
+│   ├── agent_eval.py         # end-to-end finding quality
+│   ├── robustness/           # name swaps, scan degradation, contract-type splits
+│   └── reports/              # committed result tables
+├── infra/
+│   ├── docker/               # Dockerfiles
+│   └── k8s/                  # manifests, optionally Helm
+├── gateway/                  # optional Spring Boot: auth, rate limit, audit
+├── ui/                       # optional minimal reviewer screen
+├── tests/
+└── docs/                     # architecture, model-card, eu-ai-act-assessment, eval-report, adr/
